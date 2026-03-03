@@ -1,0 +1,17 @@
+Config { overrideRedirect = False
+       , font     = "xft:iosevka-9"
+       , commands = [Run Com "/bin/sh" ["-c", "wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q MUTED || echo Mic unmuted '|'"] "mic" 10
+       	 	    , Run Cpu
+                        [ "-L", "3"
+                        , "-H", "50"
+                        , "--high"  , "red"
+                        , "--normal", "green"
+                        ] 10
+                    , Run Memory ["--template", "Mem: <usedratio>%"] 10
+                    , Run Swap [] 10
+                    , Run Date "%a %Y.%m.%d <fc=#8be9fd>%H:%M:%S</fc>" "date" 1
+                    ]
+       , sepChar  = "%"
+       , alignSep = "}{"
+       , template = "}{ %mic% %cpu% | %memory% | %swap% | %date%"
+       }

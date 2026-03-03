@@ -1,0 +1,16 @@
+{
+  imports = [
+    ./dconf.nix
+    ./dynamiclinking.nix
+    ./experimental.nix
+    ./firewall.nix
+    ./fish.nix
+    ./fonts.nix
+    ./keymap.nix
+    ./rtkit.nix
+    ./stateversion.nix
+    ./timezone.nix
+    ./unfree.nix
+    ./user.nix
+  ];
+}

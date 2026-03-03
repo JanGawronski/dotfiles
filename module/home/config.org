@@ -1,0 +1,818 @@
+TITLE: Emacs Config
+#+STARTUP: showeverything
+#+OPTIONS: toc:2
+
+* TABLE OF CONTENTS :toc:
+- [[#evil][EVIL]]
+- [[#keybindings][KEYBINDINGS]]
+- [[#all-the-icons][ALL THE ICONS]]
+- [[#buffer-move][BUFFER-MOVE]]
+- [[#company][COMPANY]]
+- [[#dashboard][DASHBOARD]]
+- [[#diminish][DIMINISH]]
+- [[#minor-tweaks][MINOR TWEAKS]]
+  - [[#disable-menubar-toolbars-and-scrollbars][Disable Menubar, Toolbars and Scrollbars]]
+  - [[#display-line-numbers-and-truncated-lines][Display Line Numbers and Truncated Lines]]
+  - [[#mode-line-line-and-column][Mode line line and column]]
+  - [[#auto-pair-parenthesis][Auto pair parenthesis]]
+  - [[#backup-directory][Backup directory]]
+- [[#neotree][NEOTREE]]
+- [[#ivy][IVY]]
+- [[#org-mode][ORG MODE]]
+  - [[#enabling-table-of-contents][Enabling Table of Contents]]
+  - [[#enabling-org-bullets][Enabling Org Bullets]]
+  - [[#disable-electric-indent][Disable electric indent]]
+- [[#multiple-cursors][MULTIPLE CURSORS]]
+- [[#projectile][PROJECTILE]]
+- [[#language-support][LANGUAGE SUPPORT]]
+  - [[#language-server-protocol][Language server protocol]]
+  - [[#yasnippet][Yasnippet]]
+  - [[#flycheck][Flycheck]]
+  - [[#handler-functions][Handler functions]]
+  - [[#haskell][Haskell]]
+  - [[#python][Python]]
+  - [[#cc][C/C++]]
+  - [[#rust][Rust]]
+  - [[#nix][Nix]]
+  - [[#latex][Latex]]
+- [[#git][GIT]]
+  - [[#git-time-machine][Git time machine]]
+  - [[#magit][Magit]]
+- [[#shell][SHELL]]
+  - [[#vterm][Vterm]]
+  - [[#vterm-toggle][Vterm-Toggle]]
+- [[#rainbow-parenthesises][RAINBOW PARENTHESISES]]
+- [[#colored-hex-values][COLORED HEX VALUES]]
+- [[#theme][THEME]]
+- [[#which-key][WHICH-KEY]]
+
+* EVIL
+
+#+begin_src emacs-lisp
+  (use-package evil
+      :init      ;; tweak evil's configuration before loading it
+      (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+      (setq evil-want-keybinding nil)
+      (setq evil-vsplit-window-right t)
+      (setq evil-split-window-below t)
+      (setq evil-undo-system 'undo-redo)
+      (setq evil-want-fine-undo t)
+      :config
+      (evil-mode))  
+    (use-package evil-collection
+      :after evil
+      :config
+      (setq evil-collection-mode-list '(dashboard dired ibuffer))
+      (evil-collection-init))
+
+  (use-package emacs :ensure nil :config (setq ring-bell-function #'ignore))
+
+  (with-eval-after-load 'evil-maps
+    (define-key evil-motion-state-map (kbd "SPC") nil)
+    (define-key evil-motion-state-map (kbd "RET") nil)
+    (define-key evil-motion-state-map (kbd "TAB") nil))
+    (setq org-return-follows-link  t)
+#+end_src
+
+* KEYBINDINGS
+
+#+begin_src emacs-lisp
+  (use-package general
+      :config
+      (general-evil-setup)
+
+      ;; set up 'SPC' as the global leader key
+      (general-create-definer main/leader-keys
+          :states '(normal insert visual emacs)
+          :keymaps 'override
+          :prefix "SPC" ;; set leader
+          :global-prefix "M-SPC") ;; access leader in insert mode
+
+      (main/leader-keys
+          "SPC" '(counsel-M-x :wk "Counsel M-x")
+          "." '(find-file :wk "Find file")
+          "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+          "f r" '(counsel-recentf :wk "Find recent files"))
+
+      (main/leader-keys
+          "b" '(:ignore t :wk "buffer")
+          "b b" '(switch-to-buffer :wk "Switch buffer")
+          "b i" '(ibuffer :wk "IBuffer")
+          "b k" '(kill-buffer-and-window :wk "Kill this buffer")
+          "b n" '(next-buffer :wk "Next buffer")
+          "b p" '(previous-buffer :wk "Previous buffer")
+          "b r" '(revert-buffer :wk "Reload buffer"))
+
+      (main/leader-keys
+          "h" '(:ignore t :wk "Help")
+          "h f" '(describe-function :wk "Describe function")
+          "h v" '(describe-variable :wk "Describe variable"))
+
+      (main/leader-keys
+          "`" '(vterm-toggle :wk "Toggle vterm")
+          "TAB" '(neotree-toggle :wk "Toggle neotree file viewer"))
+
+      (main/leader-keys
+          "w" '(:ignore t :wk "Windows")
+          ;; Window splits
+          "w c" '(evil-window-delete :wk "Close window")
+          "w n" '(evil-window-new :wk "New window")
+          "w s" '(evil-window-split :wk "Horizontal split window")
+          "w v" '(evil-window-vsplit :wk "Vertical split window")
+          ;; Window Motions
+          "w h" '(evil-window-left :wk "Window left")
+          "w j" '(evil-window-down :wk "Window down")
+          "w k" '(evil-window-up :wk "Window up")
+          "w l" '(evil-window-right :wk "Window right")
+          "w w" '(evil-window-next :wk "Goto next window")
+          ;; Move Windows
+          "w H" '(buf-move-left :wk "Buffer move left")
+          "w J" '(buf-move-down :wk "Buffer move down")
+          "w K" '(buf-move-up :wk "Buffer move up")
+          "w L" '(buf-move-right :wk "Buffer move right")) 
+
+      (main/leader-keys
+          "a" '(:ignore t :wk "Code actions")
+          "a l" '(lsp-execute-code-action :wk "Apply hint / code action")
+          "a d" '(lsp-describe-thing-at-point :wk "Describe thing at cursor")
+  	"a c" '(my/compile-file :wk "Compile and run file")
+          "a C" '(my/compile-project :wk "Compile and run project")
+          "a r" '(my/run-file :wk "Run file")
+          "a R" '(my/run-project :wk "Run project"))
+      
+      (main/leader-keys
+  	"g" '(:ignore t :wk "Git")
+  	"g s" '(magit-status :wk "Git status")
+  	"g c" '(magit-commit-create :wk "Git commit")
+  	"g p" '(magit-push-implicitly :wk "Git push"))
+      (main/leader-keys
+          "c" '(:ignore t :wk "Multiple cursors")
+          "c n" '(evil-mc-make-and-goto-next-match :wk "Next like selected")
+          "c a" '(evil-mc-make-all-cursors :wk "All like selected")
+  	"c u" '(evil-mc-undo-all-cursors :wk "Remove all additional cursors")
+      )
+  )
+#+end_src
+
+* ALL THE ICONS
+#+begin_src emacs-lisp
+(use-package all-the-icons
+  :if (display-graphic-p))
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
+  
+(use-package nerd-icons
+  :if (display-graphic-p))
+#+end_src
+
+* BUFFER-MOVE
+#+begin_src emacs-lisp
+(require 'windmove)
+
+;;;###autoload
+(defun buf-move-up ()
+  "Swap the current buffer and the buffer above the split.
+If there is no split, ie now window above the current one, an
+error is signaled."
+;;  "Switches between the current buffer, and the buffer above the
+;;  split, if possible."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'up))
+	 (buf-this-buf (window-buffer (selected-window))))
+    (if (null other-win)
+        (error "No window above this one")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
+
+;;;###autoload
+(defun buf-move-down ()
+"Swap the current buffer and the buffer under the split.
+If there is no split, ie now window under the current one, an
+error is signaled."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'down))
+	 (buf-this-buf (window-buffer (selected-window))))
+    (if (or (null other-win) 
+            (string-match "^ \\*Minibuf" (buffer-name (window-buffer other-win))))
+        (error "No window under this one")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
+
+;;;###autoload
+(defun buf-move-left ()
+"Swap the current buffer and the buffer on the left of the split.
+If there is no split, ie now window on the left of the current
+one, an error is signaled."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'left))
+	 (buf-this-buf (window-buffer (selected-window))))
+    (if (null other-win)
+        (error "No left split")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
+
+;;;###autoload
+(defun buf-move-right ()
+"Swap the current buffer and the buffer on the right of the split.
+If there is no split, ie now window on the right of the current
+one, an error is signaled."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'right))
+	 (buf-this-buf (window-buffer (selected-window))))
+    (if (null other-win)
+        (error "No right split")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
+#+end_src
+
+* COMPANY
+
+#+begin_src emacs-lisp
+  (use-package company
+    :defer 2
+    :diminish
+    :custom
+    (company-begin-commands '(self-insert-command))
+    (company-idle-delay .1)
+    (company-minimum-prefix-length 0)
+    (company-show-numbers t)
+    (company-tooltip-align-annotations 't)
+    (global-company-mode t))
+
+  (use-package company-box
+    :after company
+    :diminish
+    :hook (company-mode . company-box-mode))
+#+end_src  
+
+* DASHBOARD
+
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :config
+    (setq dashboard-projects-backend 'projectile)
+    (add-hook 'elpaca-after-init-hook #'dashboard-insert-startupify-lists)
+    (add-hook 'elpaca-after-init-hook #'dashboard-initialize)
+    (setq dashboard-items '((recents   . 10)
+                            (projects  . 10)))
+    (dashboard-setup-startup-hook))
+#+end_src
+
+* DIMINISH
+
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
+
+* MINOR TWEAKS
+
+** Disable Menubar, Toolbars and Scrollbars
+#+begin_src emacs-lisp
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+#+end_src
+
+** Display Line Numbers and Truncated Lines
+#+begin_src emacs-lisp
+  (global-display-line-numbers-mode 1)
+  (global-visual-line-mode t)
+#+end_src
+
+** Mode line line and column
+#+begin_src emacs-lisp
+  (column-number-mode t)
+  (setq mode-line-position (list "Line %l Column %c"))
+#+end_src
+
+** Auto pair parenthesis
+#+begin_src emacs-lisp
+  (electric-pair-mode 1)  
+#+end_src
+** Backup directory
+#+begin_src emacs-lisp
+(setq backup-directory-alist '((".*" . "~/.local/share/Trash/files")))
+#+end_src
+* NEOTREE
+#+begin_src emacs-lisp
+  (use-package neotree
+    :config
+    (setq neo-smart-open t
+          neo-show-hidden-files t
+          neo-window-width 30
+          neo-window-fixed-size nil
+          inhibit-compacting-font-caches t
+          projectile-switch-project-action 'neotree-projectile-action) 
+          ; truncate long file names in neotree
+          (add-hook 'neo-after-create-hook
+             #'(lambda (_)
+                 (with-current-buffer (get-buffer neo-buffer-name)
+                   (setq truncate-lines t)
+                   (setq word-wrap nil)
+                   (make-local-variable 'auto-hscroll-mode)
+                   (setq auto-hscroll-mode nil)
+  		 (display-line-numbers-mode 0)))))
+#+end_src
+* IVY
+#+begin_src emacs-lisp
+  (use-package counsel
+    :after ivy
+    :diminish
+    :config (counsel-mode))
+
+  (use-package ivy
+    :bind
+    ;; ivy-resume resumes the last Ivy-based completion.
+    (("C-c C-r" . ivy-resume)
+     ("C-x B" . ivy-switch-buffer-other-window))
+    :diminish
+    :custom
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq enable-recursive-minibuffers t)
+    :config
+    (ivy-mode))
+
+  (use-package all-the-icons-ivy-rich
+    :config (all-the-icons-ivy-rich-mode 1))
+
+  (use-package ivy-rich
+    :after ivy
+    :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
+    :custom
+    (ivy-virtual-abbreviate 'full
+     ivy-rich-switch-buffer-align-virtual-buffer t
+     ivy-rich-path-style 'abbrev)
+    :config
+    (ivy-set-display-transformer 'ivy-switch-buffer
+                                 'ivy-rich-switch-buffer-transformer))
+#+end_src
+* ORG MODE
+** Enabling Table of Contents
+#+begin_src emacs-lisp
+  (use-package toc-org
+      :commands toc-org-enable
+      :init (add-hook 'org-mode-hook 'toc-org-enable))
+#+end_src
+
+** Enabling Org Bullets
+Org-bullets gives us attractive bullets rather than asterisks.
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook 'org-indent-mode)
+  (use-package org-bullets)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+#+end_src
+** Disable electric indent
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook
+          (lambda () (set (make-local-variable 'electric-indent-mode) nil)))
+#+end_src
+* MULTIPLE CURSORS
+#+begin_src emacs-lisp
+(require 'evil-mc)
+(global-evil-mc-mode 1)
+#+end_src
+* PROJECTILE
+#+begin_src emacs-lisp
+  (use-package projectile
+  :config
+  (projectile-mode 1))
+#+end_src
+
+* LANGUAGE SUPPORT
+** Language server protocol
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :commands (lsp lsp-deferred)
+    :init (setq lsp-keymap-prefix "C-c l")
+    :custom
+    (lsp-idle-delay 0.5) 
+    :config
+    (lsp-enable-which-key-integration t)
+    (setq lsp-inlay-hint-enable t))
+
+  (with-eval-after-load 'lsp-mode
+    (require 'lsp-lens))
+
+  (with-eval-after-load 'lsp-mode
+    (require 'lsp-modeline))
+  
+  (with-eval-after-load 'lsp-mode
+    (require 'lsp-headerline))
+
+  (use-package lsp-ui
+    :after lsp-mode
+    :custom
+    (lsp-ui-sideline-enable t)
+    (lsp-ui-sideline-show-diagnostics t)
+    (lsp-ui-sideline-show-code-actions t)
+    (lsp-ui-sideline-delay 0.2)
+    :commands lsp-ui-mode)
+#+end_src
+** Yasnippet
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :defer 1
+  :config
+  (yas-reload-all)
+  (yas-global-mode 1))
+
+(use-package yasnippet-snippets
+  :after yasnippet
+  :defer 2)
+#+end_src
+** Flycheck
+#+begin_src emacs-lisp
+(use-package flycheck
+  :defer t
+  :diminish
+  :config (global-flycheck-mode))
+
+#+end_src
+** Handler functions
+#+begin_src emacs-lisp
+  (defun my/project-root ()
+   (cond ((projectile-project-root) (projectile-project-root))
+         (t default-directory))) 
+
+  (defun my/run-file ()
+    (interactive)
+    (if (and (boundp 'my/run-file-handler) my/run-file-handler)
+        (funcall my/run-file-handler)
+      (user-error "No run handler set for %s" major-mode)))
+
+  (defun my/default-run-file ()
+    (interactive)
+    (let ((file (buffer-file-name)))
+      (unless file (user-error "Buffer is not visiting a file"))
+      (let* ((base (file-name-base file))
+             (cmd  (format "./%s"
+                       (shell-quote-argument base))))
+        (compile cmd))))
+
+  (defun my/compile-file ()
+    (interactive)
+    (if (and (boundp 'my/compile-file-handler) my/compile-file-handler)
+        (funcall my/compile-file-handler)
+      (user-error "No compile handler set for %s" major-mode)))
+
+  (defun my/run-project ()
+    (interactive)
+    (if (and (boundp 'my/run-project-handler) my/run-project-handler)
+        (funcall my/run-project-handler)
+      (user-error "No run handler set for %s" major-mode)))
+
+  (defun my/compile-project ()
+    (interactive)
+    (if (and (boundp 'my/compile-project-handler) my/compile-project-handler)
+        (funcall my/compile-project-handler)
+      (user-error "No compile handler set for %s" major-mode))) 
+#+end_src
+** Haskell
+#+begin_src emacs-lisp
+  (use-package haskell-mode
+  :defer t
+  :mode ("\\.hs\\'" "\\.lhs\\'")
+  :hook ((haskell-mode . haskell-indentation-mode)
+         (haskell-mode . lsp)
+         (haskell-mode . (lambda ()
+                           (setq-local my/compile-file-handler #'my/haskell-compile-file)))
+         (haskell-mode . (lambda ()
+                           (setq-local my/run-file-handler #'my/default-run-file)))))
+
+  (use-package lsp-haskell
+  :after lsp-mode)
+
+  (defun my/haskell-compile-file ()
+  (interactive)
+  (save-buffer)
+  (let ((file (buffer-file-name)))
+    (unless file (user-error "Buffer is not visiting a file"))
+    (let* ((base (file-name-base file))
+           (cmd  (format "ghc %s.hs && ./%s"
+                         (shell-quote-argument base)
+                         (shell-quote-argument base))))
+      (compile cmd))))
+#+end_src
+** Python
+#+begin_src emacs-lisp
+    (use-package lsp-pyright
+      :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
+      :hook (python-mode . (lambda ()
+                              (require 'lsp-pyright)
+                              (lsp-deferred)))
+            (python-mode . (lambda ()
+  			   (setq-local my/run-file-handler #'my/python-run-file)))
+            (python-mode . (lambda ()
+  			   (setq-local my/run-project-handler #'my/python-run-project)))) 
+
+  (defun my/python-run-file ()
+    (interactive)
+    (save-buffer)
+    (let* ((proj (file-name-as-directory (my/project-root)))
+         (venv-py (expand-file-name ".venv/bin/python" proj))
+         (python-cmd (cond
+                      ((file-exists-p venv-py) (file-relative-name (shell-quote-argument venv-py) proj))
+                      (t "python")))
+         (cmd (format "%s %s" python-cmd (file-relative-name (buffer-file-name) proj)))
+         (default-directory proj))
+      (compile cmd)))
+
+  (defun my/python-run-project ()
+    (interactive)
+    (save-buffer)
+    (let* ((proj (file-name-as-directory (my/project-root)))
+         (venv-py (expand-file-name ".venv/bin/python" proj))
+         (python-cmd (cond
+                      ((file-exists-p venv-py) (file-relative-name (shell-quote-argument venv-py) proj))
+                      (t "python")))
+         (cmd (format "%s main.py" python-cmd))
+         (default-directory proj))
+      (compile cmd)))
+#+end_src
+** C/C++
+#+begin_src emacs-lisp
+  (use-package cc-mode
+    :ensure nil
+    :defer t
+    :config
+    (setq c-default-style "k&r"
+  	c-basic-offset 4)
+    (add-hook 'c-mode-hook (lambda () (setq-local company-backends '(company-capf company-files))))
+    (add-hook 'c++-mode-hook (lambda () (setq-local company-backends '(company-capf company-files)))))
+
+  (add-hook 'c-mode-hook #'lsp-deferred)
+  (add-hook 'c-mode-hook (lambda () (setq-local my/run-file-handler #'my/default-run-file)))
+  (add-hook 'c-mode-hook (lambda () (setq-local my/compile-file-handler #'my/c-compile-file)))
+  (add-hook 'c-mode-hook (lambda () (setq-local my/run-project-handler #'my/c-run-project)))
+  (add-hook 'c-mode-hook (lambda () (setq-local my/compile-project-handler #'my/c-compile-project)))
+
+  (add-hook 'c++-mode-hook #'lsp-deferred)
+  (add-hook 'c++-mode-hook (lambda () (setq-local my/run-file-handler #'my/default-run-file)))
+  (add-hook 'c++-mode-hook (lambda () (setq-local my/compile-file-handler #'my/c++-compile-file)))
+  (add-hook 'c++-mode-hook (lambda () (setq-local my/run-project-handler #'my/c-run-project)))
+  (add-hook 'c++-mode-hook (lambda () (setq-local my/compile-project-handler #'my/c-compile-project)))
+
+  (defun my/c-compile-file ()
+    (interactive)
+    (save-buffer)
+    (let ((base (shell-quote-argument (file-name-base (buffer-file-name)))))
+      (compile (format "gcc %s.c -o %s && ./%s" base base base))))  
+
+  (defun my/c++-compile-file ()
+    (interactive)
+    (save-buffer)
+    (let ((base (shell-quote-argument (file-name-base (buffer-file-name)))))
+      (compile (format "g++ %s.cpp -o %s && ./%s" base base base)))) 
+
+  (defun my/c-run-project ()
+    (interactive)
+    (save-buffer)
+    (let ((default-directory (cond 
+                                   ((file-exists-p "Makefile") default-directory) 
+                                   (t (file-name-as-directory (my/project-root)))))) 
+        (compile "make run")))
+
+  (defun my/c-compile-project ()
+    (interactive)
+    (save-buffer)
+    (let ((default-directory (cond 
+                                   ((file-exists-p "Makefile") default-directory) 
+                                   (t (file-name-as-directory (my/project-root)))))) 
+        (compile "make")))
+#+end_src
+
+** Rust
+#+begin_src emacs-lisp
+  (use-package rust-mode
+      :mode "\\.rs\\'"
+      :hook (rust-mode . (lambda ()
+                          (when (fboundp 'lsp-deferred) (lsp-deferred))))
+            (rust-mode . (lambda ()
+  			 (setq-local my/run-file-handler #'rustic-cargo-run)))
+            (rust-mode . (lambda ()
+  			 (setq-local my/run-file-handler #'rustic-cargo-run)))
+      :config
+      (setq rust-format-on-save t)) ;; uses rustfmt if available
+
+  (use-package rustic
+      :after rust-mode
+      :config
+      ;; prefer lsp-mode rust-analyzer integration
+      (setq rustic-lsp-client 'lsp)
+      (setq rustic-format-on-save t))
+
+  (use-package cargo
+      :hook (rust-mode . cargo-minor-mode))
+
+  (use-package flycheck-rust)
+  (with-eval-after-load 'rust-mode
+  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+  (use-package toml-mode)
+#+end_src
+
+** Nix
+#+begin_src emacs-lisp
+(require 'lsp-mode)
+(require 'nix-mode)
+
+;; tell lsp-mode which language id to use for nix-mode buffers
+(add-to-list 'lsp-language-id-configuration '(nix-mode . "nix"))
+
+;; register nixd as a stdio LSP server for nix-mode
+(lsp-register-client
+ (make-lsp-client
+  :new-connection (lsp-stdio-connection '("nixd"))
+  :major-modes '(nix-mode)
+  :activation-fn (lsp-activate-on "nix")
+  :server-id 'nixd))
+
+;; auto-start lsp for nix files
+(add-hook 'nix-mode-hook #'lsp-deferred)
+#+end_src
+
+** Latex
+#+begin_src emacs-lisp
+(require 'auctex)
+(use-package auctex
+  :defer t
+  :init
+  ;; safe early vars (won't error if unknown; these are harmless to set early)
+  (setq TeX-auto-save t
+        TeX-parse-self t
+        TeX-save-query nil)
+  :config
+  ;; ensure the tex feature is loaded so TeX-command-list exists
+  (require 'tex)  ;; (require 'tex-site) also OK in some installs
+
+  ;; now we can safely add a latexmk entry and set defaults
+  (with-eval-after-load 'tex
+    ;; add latexmk if not already present
+    (unless (assoc "LatexMk" TeX-command-list)
+      (add-to-list 'TeX-command-list
+                   '("LatexMk"
+                     "latexmk -pdf -synctex=1 -interaction=nonstopmode %s"
+                     TeX-run-TeX nil t :help "Run latexmk")))
+
+    (setq TeX-command-default "LatexMk"
+          TeX-source-correlate-method 'synctex
+          TeX-source-correlate-start-server t))
+
+(add-hook 'LaTeX-mode-hook #'turn-on-reftex)
+(add-hook 'LaTeX-mode-hook (lambda ()
+  			 (setq-local my/compile-file-handler #'my/latex-compile-file))))
+
+(defun my/latex-compile-file ()
+    (interactive)
+    (save-buffer)
+    (let ((base (shell-quote-argument (file-name-base (buffer-file-name)))))
+      (compile (format "pdflatex %s.tex" base))))  
+
+;; RefTeX integration (nice cross-ref, label, citations)
+(use-package reftex
+  :defer t
+  :config
+  (setq reftex-plug-into-AUCTeX t))
+
+;; PDF Tools: in-Emacs PDF viewer with SyncTeX support
+(use-package pdf-tools
+  :magic ("%PDF" . pdf-view-mode)
+  :config
+  (require 'pdf-occur)
+  (require 'pdf-history)
+  (require 'pdf-links)
+  (require 'pdf-outline)
+  (require 'pdf-annot)
+  (require 'pdf-sync)
+  ;; installs server; may need external build step on first run
+  (pdf-tools-install)
+  ;; tell AUCTeX to use PDF Tools for viewing
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+        TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view)))
+  ;; enable server for inverse search if desired
+  (setq TeX-source-correlate-start-server t))
+
+(use-package company-auctex
+  :after (company auctex)
+  :config
+  (company-auctex-init))
+
+(add-hook 'pdf-view-mode-hook
+          (lambda ()
+              (display-line-numbers-mode -1)))
+#+end_src
+* GIT
+** Git time machine
+#+begin_src emacs-lisp
+(use-package git-timemachine
+    :after git-timemachine
+    :hook (evil-normalize-keymaps . git-timemachine-hook)
+    :config
+        (evil-define-key 'normal git-timemachine-mode-map (kbd "C-j") 'git-timemachine-show-previous-revision)
+        (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision)
+)
+#+end_src
+** Magit
+#+begin_src emacs-lisp
+  (use-package magit)
+  (use-package transient)
+#+end_src
+* SHELL
+** Vterm
+#+begin_src emacs-lisp
+  (use-package vterm
+  :config
+  (setq vterm-shell "/usr/bin/env fish"
+      vterm-max-scrollback 5000))
+  (add-hook 'vterm-mode-hook
+          (lambda ()
+            (display-line-numbers-mode 0)))
+#+end_src
+** Vterm-Toggle
+#+begin_src emacs-lisp
+  (use-package vterm-toggle
+  :after vterm
+  :config
+  (setq vterm-toggle-fullscreen-p nil)
+  (setq vterm-toggle-scope 'project)
+  (add-to-list 'display-buffer-alist
+               '((lambda (buffer-or-name _)
+                     (let ((buffer (get-buffer buffer-or-name)))
+                       (with-current-buffer buffer
+                         (or (equal major-mode 'vterm-mode)
+                             (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
+                  (display-buffer-reuse-window display-buffer-at-bottom)
+                  (reusable-frames . visible)
+                  (window-height . 0.3))))
+#+end_src
+
+* RAINBOW PARENTHESISES
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :hook ((prog-mode . rainbow-delimiters-mode)))
+#+end_src
+
+* COLORED HEX VALUES
+#+begin_src emacs-lisp
+  (use-package rainbow-mode
+  :diminish
+  :hook org-mode prog-mode)
+#+end_src
+* THEME
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :demand t
+  :custom
+  (doom-themes-enable-bold t)
+  (doom-themes-enable-italic t)
+  (doom-themes-treemacs-theme "doom-atom")
+  :config
+  (load-theme 'doom-dark+ t)
+
+  (require 'doom-themes-ext-visual-bell nil t)
+  (when (fboundp 'doom-themes-visual-bell-config)
+    (doom-themes-visual-bell-config))
+
+  (when (fboundp 'doom-themes-neotree-config)
+    (doom-themes-neotree-config))
+  (when (fboundp 'doom-themes-treemacs-config)
+    (doom-themes-treemacs-config))
+  (when (fboundp 'doom-themes-org-config)
+    (doom-themes-org-config)))
+#+end_src
+
+* WHICH-KEY
+#+begin_src emacs-lisp
+  (use-package which-key
+    :init
+      (which-key-mode 1)
+    :diminish
+    :config
+    (setq which-key-side-window-location 'bottom
+  	  which-key-sort-order #'which-key-key-order-alpha
+  	  which-key-sort-uppercase-first nil
+  	  which-key-add-column-padding 1
+  	  which-key-max-display-columns nil
+  	  which-key-min-display-lines 6
+  	  which-key-side-window-slot -10
+  	  which-key-side-window-max-height 0.25
+  	  which-key-idle-delay 0.8
+  	  which-key-max-description-length 25
+  	  which-key-allow-imprecise-window-fit t
+  	  which-key-separator " → " ))
+#+end_src
