@@ -112,4 +112,6 @@ main = xmonad $ docks def
   , ("M-s v 8", spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.8")
   , ("M-s v 9", spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.9")
   , ("M-s v 0", spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1")
+  , ("M-s w e", spawn "nmcli radio wifi on")
+  , ("M-s w d", spawn "nmcli radio wifi off")
   ]
