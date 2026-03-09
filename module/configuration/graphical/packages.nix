@@ -11,5 +11,6 @@
     maim
     xdotool
     xclip
+    quartus-prime-lite
   ];
 }
