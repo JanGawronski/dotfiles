@@ -12,5 +12,6 @@
     ./timezone.nix
     ./unfree.nix
     ./user.nix
+    ./agenix.nix
   ];
 }

@@ -1,4 +1,4 @@
-{
+{config, ...}: {
   programs.git = {
 		enable = true;
 		settings = {
@@ -7,6 +7,7 @@
 				email = "jangawronski04@gmail.com";
 			};
 			init.defaultBranch = "master";
+      credential.helper = "store --file /run/agenix/git-credentials";
 		};
-	};
+  };
 }
