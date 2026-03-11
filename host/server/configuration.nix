@@ -3,7 +3,7 @@
   imports = [
     ./../../module/configuration
     ./../../module/configuration/ssh.nix
-    ./../../module/configuration/bootloader.nix
+    ./bootloader.nix
     ./hardware-configuration.nix
     ./networking.nix
     (import ./../../module/configuration/hostname.nix { inherit hostname; })
