@@ -14,8 +14,11 @@
     };
 
     agenix.url = "github:ryantm/agenix";
+    
+    ngrok.url = "github:ngrok/ngrok-nix";
   };
-  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ... }: { 
+  
+  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, ... }: { 
     nixosConfigurations = nixpkgs.lib.foldl' (configs: hostname:
       configs // {
         "${hostname}" = nixpkgs.lib.nixosSystem {
@@ -24,6 +27,7 @@
 	          ./host/${hostname}/configuration.nix
             agenix.nixosModules.default
             { environment.systemPackages = [ agenix.packages.x86_64-linux.default ]; }
+            ngrok.nixosModules.ngrok
 	          home-manager.nixosModules.home-manager {
 		          home-manager = {
 			          useGlobalPkgs = true;

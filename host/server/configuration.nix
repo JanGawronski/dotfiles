@@ -6,6 +6,8 @@
     ./bootloader.nix
     ./hardware-configuration.nix
     ./networking.nix
+    ./agenix.nix
+    (import ./ngrok.nix { inherit config; })
     (import ./../../module/configuration/hostname.nix { inherit hostname; })
   ];
 
