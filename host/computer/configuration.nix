@@ -5,7 +5,6 @@
     ./../../module/configuration/graphical
     ./../../module/configuration/ssh.nix
     ./hardware-configuration.nix
-    ./kernel.nix
     ./networking.nix
     ./monitors.nix
     ./nvidia.nix

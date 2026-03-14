@@ -7,6 +7,7 @@
     ./fish.nix
     ./fonts.nix
     ./keymap.nix
+    ./kernel.nix
     ./rtkit.nix
     ./stateversion.nix
     ./timezone.nix
