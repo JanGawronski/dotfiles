@@ -7,6 +7,12 @@
         owner = "ngrok";
         group = "ngrok";
       };
+      playit = {
+        file = ./../../secrets/playit.age;
+        mode = "400";
+        owner = "user";
+        group = "users";
+      };
     };
   };
 }
