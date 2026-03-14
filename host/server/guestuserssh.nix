@@ -1,3 +1,3 @@
 {
-  services.openssh.extraConfig = "Match User user\nPasswordAuthentication yes";
+  services.openssh.extraConfig = "Match User guest\nPasswordAuthentication yes";
 }
