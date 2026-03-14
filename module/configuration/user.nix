@@ -1,6 +1,7 @@
-{
+{config, ...}: {
   users.users.user = {
     isNormalUser = true;
+    hashedPasswordFile = config.age.secrets.user-password.path;
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGJ/dg13sIsZ7fIJa5DCrph4V8o6yJACiYAqJ1U7Nh5j computer" 

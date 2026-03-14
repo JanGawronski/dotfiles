@@ -2,6 +2,8 @@ let
   secretNames = [
     "git-credentials.age"
     "ngrok.age"
+    "userpassword.age"
+    "rootpassword.age"
   ];
 
   mkSecret = name: {
