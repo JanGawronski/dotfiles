@@ -8,6 +8,7 @@
     ./networking.nix
     ./agenix.nix
     (import ./ngrok.nix { inherit config; })
+    (import ./playit.nix { inherit config; })
     (import ./../../module/configuration/hostname.nix { inherit hostname; })
   ];
 

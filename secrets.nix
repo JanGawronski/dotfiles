@@ -1,13 +1,14 @@
 let
   secretNames = [
-    "git-credentials.age"
-    "ngrok.age"
-    "userpassword.age"
-    "rootpassword.age"
+    "git-credentials"
+    "ngrok"
+    "playit"
+    "userpassword"
+    "rootpassword"
   ];
 
   mkSecret = name: {
-    name = "secrets/${name}";
+    name = "secrets/${name}.age";
     value = {
       publicKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF6yz8qF2AurZtWC4VuudcQV2gs2wLopanb7eEoMg8Ef" #computer

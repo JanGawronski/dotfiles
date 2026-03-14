@@ -16,9 +16,11 @@
     agenix.url = "github:ryantm/agenix";
     
     ngrok.url = "github:ngrok/ngrok-nix";
+
+    playit-nixos-module.url = "github:pedorich-n/playit-nixos-module";
   };
   
-  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, ... }: { 
+  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, playit-nixos-module, ... }: { 
     nixosConfigurations = nixpkgs.lib.foldl' (configs: hostname:
       configs // {
         "${hostname}" = nixpkgs.lib.nixosSystem {
@@ -28,6 +30,7 @@
             agenix.nixosModules.default
             { environment.systemPackages = [ agenix.packages.x86_64-linux.default ]; }
             ngrok.nixosModules.ngrok
+            playit-nixos-module.nixosModules.default
 	          home-manager.nixosModules.home-manager {
 		          home-manager = {
 			          useGlobalPkgs = true;
