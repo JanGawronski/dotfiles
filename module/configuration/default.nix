@@ -16,5 +16,6 @@
     ./agenix.nix
     ./vim.nix
     ./zoxide.nix
+    ./pamsshd.nix
   ];
 }
