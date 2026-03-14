@@ -1,7 +1,5 @@
-{pkgs, ...}:
-{
+{pkgs, ...}: {
   basePackages = with pkgs; [
-    vim
     wget  
     p7zip
     unrar

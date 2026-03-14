@@ -14,5 +14,7 @@
     ./unfree.nix
     ./user.nix
     ./agenix.nix
+    ./vim.nix
+    ./zoxide.nix
   ];
 }

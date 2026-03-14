@@ -9,6 +9,5 @@
     ./stateversion.nix
     ./username.nix
     ./yt-dlp.nix
-    ./zoxide.nix
   ];
 }
