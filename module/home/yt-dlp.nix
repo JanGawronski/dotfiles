@@ -10,7 +10,6 @@
       embed-thumbnail = true;
       embed-metadata = true;
       output = "%(title)s.%(ext)s";
-      cookies-from-browser = "firefox:~/.config/zen/";
     };
     extraConfig = ''
     --replace-in-metadata artist " " ""
