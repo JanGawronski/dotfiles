@@ -10,6 +10,8 @@
     (import ./ngrok.nix { inherit config; })
     (import ./playit.nix { inherit config; })
     (import ./../../module/configuration/hostname.nix { inherit hostname; })
+    ./guestuser.nix
+    ./guestuserssh.nix
   ];
 
   environment.systemPackages = (import ./../../module/configuration/packages.nix { inherit pkgs; }).basePackages;

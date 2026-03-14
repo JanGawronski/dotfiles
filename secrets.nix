@@ -5,6 +5,7 @@ let
     "playit"
     "userpassword"
     "rootpassword"
+    "guestpassword"
   ];
 
   mkSecret = name: {

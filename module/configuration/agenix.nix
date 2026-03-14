@@ -3,6 +3,7 @@
     secrets = {
       user-password.file = ./../../secrets/userpassword.age;
       root-password.file = ./../../secrets/rootpassword.age;
+      guest-password.file = ./../../secrets/guestpassword.age;
       git-credentials = {
         file = ./../../secrets/git-credentials.age;
         mode = "400";
