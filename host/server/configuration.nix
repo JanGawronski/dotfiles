@@ -12,6 +12,7 @@
     (import ./../../module/configuration/hostname.nix { inherit hostname; })
     ./guestuser.nix
     ./guestuserssh.nix
+    (import ./musicbot.nix { inherit config; })
   ];
 
   environment.systemPackages = (import ./../../module/configuration/packages.nix { inherit pkgs; }).basePackages;

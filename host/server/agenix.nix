@@ -13,6 +13,12 @@
         owner = "user";
         group = "users";
       };
+      musicbot = {
+        file = ./../../secrets/musicbot.age;
+        mode = "400";
+        owner = "musicbot";
+        group = "musicbot";
+      };
     };
   };
 }

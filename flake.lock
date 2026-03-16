@@ -120,6 +120,26 @@
         "type": "github"
       }
     },
+    "musicbot": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773685651,
+        "narHash": "sha256-9nKyZSipKJpSaXTChlxRrqCWjTztCfOrLd/LETfMDOY=",
+        "owner": "JanGawronski",
+        "repo": "musicbot",
+        "rev": "c3b313f3daee655b788975a8ad8d5800b1beb227",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JanGawronski",
+        "repo": "musicbot",
+        "type": "github"
+      }
+    },
     "ngrok": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -256,6 +276,7 @@
       "inputs": {
         "agenix": "agenix",
         "home-manager": "home-manager_2",
+        "musicbot": "musicbot",
         "ngrok": "ngrok",
         "nixpkgs": "nixpkgs_3",
         "playit-nixos-module": "playit-nixos-module",

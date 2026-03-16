@@ -18,9 +18,14 @@
     ngrok.url = "github:ngrok/ngrok-nix";
 
     playit-nixos-module.url = "github:pedorich-n/playit-nixos-module";
+
+    musicbot = {
+      url = "github:JanGawronski/musicbot";
+      inputs.nixpkgs.follows = "nixpkgs";
+    }; 
   };
   
-  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, playit-nixos-module, ... }: { 
+  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, playit-nixos-module, musicbot, ... }: { 
     nixosConfigurations = nixpkgs.lib.foldl' (configs: hostname:
       configs // {
         "${hostname}" = nixpkgs.lib.nixosSystem {
@@ -31,6 +36,7 @@
             { environment.systemPackages = [ agenix.packages.x86_64-linux.default ]; }
             ngrok.nixosModules.ngrok
             playit-nixos-module.nixosModules.default
+	          musicbot.nixosModule
 	          home-manager.nixosModules.home-manager {
 		          home-manager = {
 			          useGlobalPkgs = true;

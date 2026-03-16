@@ -3,6 +3,7 @@ let
     "git-credentials"
     "ngrok"
     "playit"
+    "musicbot"
     "userpassword"
     "rootpassword"
     "guestpassword"
