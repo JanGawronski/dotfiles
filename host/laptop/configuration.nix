@@ -4,7 +4,6 @@
     ./../../module/configuration
     ./../../module/configuration/graphical
     ./hardware-configuration.nix
-    ./kernel.nix
     ./networking.nix
     (import ./../../module/configuration/hostname.nix { inherit hostname; })
   ];
