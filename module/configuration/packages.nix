@@ -42,5 +42,6 @@
     texliveFull
     uv
     pandoc
+    file
   ];
 }
