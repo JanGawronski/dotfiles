@@ -29,7 +29,7 @@
     fishPlugins.fzf-fish
     fzf
     fd
-    ripgrep
+    ripgrep-all
     zoxide
     bat
     eza
