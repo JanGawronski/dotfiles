@@ -44,5 +44,6 @@
     uv
     pandoc
     file
+    usbutils
   ];
 }
