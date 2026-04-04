@@ -12,5 +12,6 @@
     xdotool
     xclip
     quartus-prime-lite
+    prismlauncher
   ];
 }
