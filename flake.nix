@@ -25,9 +25,11 @@
     }; 
     
     copilot-cli.url = "github:scarisey/copilot-cli-flake";
+
+    quartus.url = "github:jangawronski/quartus-prime-pro-flake";
   };
   
-  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, playit-nixos-module, musicbot, copilot-cli, ... }: { 
+  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, playit-nixos-module, musicbot, copilot-cli, quartus, ... }: { 
     nixosConfigurations = nixpkgs.lib.foldl' (configs: hostname:
       configs // {
         "${hostname}" = nixpkgs.lib.nixosSystem {
@@ -42,6 +44,7 @@
             ngrok.nixosModules.ngrok
             playit-nixos-module.nixosModules.default
 	          musicbot.nixosModule
+            quartus.nixosModules.default
 	          home-manager.nixosModules.home-manager {
 		          home-manager = {
 			          useGlobalPkgs = true;

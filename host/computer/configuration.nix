@@ -8,6 +8,7 @@
     ./networking.nix
     ./monitors.nix
     ./nvidia.nix
+    ./quartus.nix
     (import ./../../module/configuration/hostname.nix { inherit hostname; })
   ];
 
