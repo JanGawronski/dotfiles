@@ -25,7 +25,7 @@
 			};
 
 			"AGH" = {
-				hostname = "shell.ii.agh.edu.pl";
+				hostname = "shell.lab.ii.agh.edu.pl";
 				user = "gawronsk";
 				identityFile = "/home/user/.ssh/id_ed25519";
 				identitiesOnly = true;
