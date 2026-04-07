@@ -145,11 +145,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773685651,
-        "narHash": "sha256-9nKyZSipKJpSaXTChlxRrqCWjTztCfOrLd/LETfMDOY=",
+        "lastModified": 1775580247,
+        "narHash": "sha256-1y4KgeYorwbpMUYw6BD2Ihc1HnQYs5zk9L13il3cL0o=",
         "owner": "JanGawronski",
         "repo": "musicbot",
-        "rev": "c3b313f3daee655b788975a8ad8d5800b1beb227",
+        "rev": "c1218f9203e9bb3af72313250d6f606fd6560c8d",
         "type": "github"
       },
       "original": {
