@@ -45,5 +45,6 @@
     pandoc
     file
     usbutils
+    poppler-utils
   ];
 }
