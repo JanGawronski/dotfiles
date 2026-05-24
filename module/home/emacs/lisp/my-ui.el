@@ -33,8 +33,10 @@
 
 (global-display-line-numbers-mode 1)
 (global-visual-line-mode t)
-
+(setq display-line-numbers-type 'relative
+      display-line-numbers-current-absolute t)
 (column-number-mode t)
+
 (setq mode-line-position '("Line %l Column %c " (-3 "%p")))
 
 (electric-pair-mode 1)
