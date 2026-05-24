@@ -92,7 +92,7 @@ one, an error is signaled."
 
 (main/leader-keys
   "SPC" '(counsel-M-x :wk "Counsel M-x")
-  "." '(find-file :wk "Find file")
+  "." '(counsel-find-file :wk "Find file")
   "f c" '((lambda ()
             (interactive)
             (find-file (expand-file-name "init.el" user-emacs-directory)))
