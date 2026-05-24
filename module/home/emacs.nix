@@ -6,7 +6,6 @@
 			use-package
 			magit
 			vterm
-			general
 			all-the-icons
 			all-the-icons-dired
 			nerd-icons
@@ -14,7 +13,6 @@
 			company-box
 			dashboard
 			diminish
-			neotree
 			counsel
 			ivy
 			all-the-icons-ivy-rich

@@ -56,8 +56,6 @@
   (when (fboundp 'doom-themes-visual-bell-config)
     (doom-themes-visual-bell-config))
 
-  (when (fboundp 'doom-themes-neotree-config)
-    (doom-themes-neotree-config))
   (when (fboundp 'doom-themes-treemacs-config)
     (doom-themes-treemacs-config))
   (when (fboundp 'doom-themes-org-config)
