@@ -35,7 +35,7 @@
 (global-visual-line-mode t)
 
 (column-number-mode t)
-(setq mode-line-position (list "Line %l Column %c"))
+(setq mode-line-position '("Line %l Column %c " (-3 "%p")))
 
 (electric-pair-mode 1)
 
