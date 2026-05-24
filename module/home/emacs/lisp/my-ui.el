@@ -41,7 +41,31 @@
 
 (electric-pair-mode 1)
 
-(setq backup-directory-alist '((".*" . "~/.local/share/Trash/files")))
+;; Keep auto-save (#file#), backups (file~) and other state out of project directories.
+(let* ((state-home (or (getenv "XDG_STATE_HOME")
+                       (expand-file-name "~/.local/state")))
+       (emacs-state (expand-file-name "emacs" state-home))
+       (autosave-dir (expand-file-name "auto-save" emacs-state))
+       (backup-dir (expand-file-name "backup" emacs-state)))
+  (dolist (dir (list autosave-dir backup-dir))
+    (unless (file-directory-p dir)
+      (make-directory dir t)))
+
+  ;; Auto-saves: redirect #...# files.
+  (setq auto-save-file-name-transforms `((".*" ,(file-name-as-directory autosave-dir) t))
+        auto-save-list-file-prefix (expand-file-name ".saves-" (file-name-as-directory autosave-dir))
+        tramp-auto-save-directory autosave-dir)
+
+  ;; Backups: redirect file~.
+  (setq backup-directory-alist `(("." . ,backup-dir))
+        backup-by-copying t
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t))
+
+;; Lockfiles (.#file): these cannot be redirected; disable them if you don't want them.
+(setq create-lockfiles nil)
 
 (use-package doom-themes
   :demand t
