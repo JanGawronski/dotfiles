@@ -3,7 +3,6 @@ TITLE: Emacs Config
 #+OPTIONS: toc:2
 
 * TABLE OF CONTENTS :toc:
-- [[#evil][EVIL]]
 - [[#keybindings][KEYBINDINGS]]
 - [[#all-the-icons][ALL THE ICONS]]
 - [[#buffer-move][BUFFER-MOVE]]
@@ -46,47 +45,32 @@ TITLE: Emacs Config
 - [[#theme][THEME]]
 - [[#which-key][WHICH-KEY]]
 
-* EVIL
-
-#+begin_src emacs-lisp
-  (use-package evil
-      :init      ;; tweak evil's configuration before loading it
-      (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
-      (setq evil-want-keybinding nil)
-      (setq evil-vsplit-window-right t)
-      (setq evil-split-window-below t)
-      (setq evil-undo-system 'undo-redo)
-      (setq evil-want-fine-undo t)
-      :config
-      (evil-mode))  
-    (use-package evil-collection
-      :after evil
-      :config
-      (setq evil-collection-mode-list '(dashboard dired ibuffer))
-      (evil-collection-init))
-
-  (use-package emacs :ensure nil :config (setq ring-bell-function #'ignore))
-
-  (with-eval-after-load 'evil-maps
-    (define-key evil-motion-state-map (kbd "SPC") nil)
-    (define-key evil-motion-state-map (kbd "RET") nil)
-    (define-key evil-motion-state-map (kbd "TAB") nil))
-    (setq org-return-follows-link  t)
-#+end_src
-
 * KEYBINDINGS
 
 #+begin_src emacs-lisp
   (use-package general
-      :config
-      (general-evil-setup)
+    :config
+    (defun main/window-new ()
+      (interactive)
+      (let ((win (split-window-sensibly)))
+        (when (windowp win)
+          (select-window win)
+          (balance-windows))))
 
-      ;; set up 'SPC' as the global leader key
-      (general-create-definer main/leader-keys
-          :states '(normal insert visual emacs)
-          :keymaps 'override
-          :prefix "SPC" ;; set leader
-          :global-prefix "M-SPC") ;; access leader in insert mode
+    (defun main/window-split-below ()
+      (interactive)
+      (select-window (split-window-below))
+      (balance-windows))
+
+    (defun main/window-split-right ()
+      (interactive)
+      (select-window (split-window-right))
+      (balance-windows))
+
+    (general-create-definer main/leader-keys
+      :keymaps 'override
+      :prefix "M-SPC"
+      :global-prefix "M-SPC")
 
       (main/leader-keys
           "SPC" '(counsel-M-x :wk "Counsel M-x")
@@ -113,23 +97,23 @@ TITLE: Emacs Config
           "TAB" '(neotree-toggle :wk "Toggle neotree file viewer"))
 
       (main/leader-keys
-          "w" '(:ignore t :wk "Windows")
-          ;; Window splits
-          "w c" '(evil-window-delete :wk "Close window")
-          "w n" '(evil-window-new :wk "New window")
-          "w s" '(evil-window-split :wk "Horizontal split window")
-          "w v" '(evil-window-vsplit :wk "Vertical split window")
-          ;; Window Motions
-          "w h" '(evil-window-left :wk "Window left")
-          "w j" '(evil-window-down :wk "Window down")
-          "w k" '(evil-window-up :wk "Window up")
-          "w l" '(evil-window-right :wk "Window right")
-          "w w" '(evil-window-next :wk "Goto next window")
-          ;; Move Windows
-          "w H" '(buf-move-left :wk "Buffer move left")
-          "w J" '(buf-move-down :wk "Buffer move down")
-          "w K" '(buf-move-up :wk "Buffer move up")
-          "w L" '(buf-move-right :wk "Buffer move right")) 
+        "w" '(:ignore t :wk "Windows")
+        ;; Window splits
+        "w c" '(delete-window :wk "Close window")
+        "w n" '(main/window-new :wk "New window")
+        "w s" '(main/window-split-below :wk "Horizontal split window")
+        "w v" '(main/window-split-right :wk "Vertical split window")
+        ;; Window motions
+        "w h" '(windmove-left :wk "Window left")
+        "w j" '(windmove-down :wk "Window down")
+        "w k" '(windmove-up :wk "Window up")
+        "w l" '(windmove-right :wk "Window right")
+        "w w" '(other-window :wk "Goto next window")
+        ;; Move windows
+        "w H" '(buf-move-left :wk "Buffer move left")
+        "w J" '(buf-move-down :wk "Buffer move down")
+        "w K" '(buf-move-up :wk "Buffer move up")
+        "w L" '(buf-move-right :wk "Buffer move right"))
 
       (main/leader-keys
           "a" '(:ignore t :wk "Code actions")
@@ -146,11 +130,10 @@ TITLE: Emacs Config
   	"g c" '(magit-commit-create :wk "Git commit")
   	"g p" '(magit-push-implicitly :wk "Git push"))
       (main/leader-keys
-          "c" '(:ignore t :wk "Multiple cursors")
-          "c n" '(evil-mc-make-and-goto-next-match :wk "Next like selected")
-          "c a" '(evil-mc-make-all-cursors :wk "All like selected")
-  	"c u" '(evil-mc-undo-all-cursors :wk "Remove all additional cursors")
-      )
+        "c" '(:ignore t :wk "Multiple cursors")
+        "c n" '(mc/mark-next-like-this :wk "Next like selected")
+        "c a" '(mc/mark-all-like-this :wk "All like selected")
+        "c u" '(mc/keyboard-quit :wk "Remove all additional cursors"))
   )
 #+end_src
 
@@ -279,6 +262,11 @@ one, an error is signaled."
 
 * MINOR TWEAKS
 
+** Disable bell
+#+begin_src emacs-lisp
+(setq ring-bell-function #'ignore)
+#+end_src
+
 ** Disable Menubar, Toolbars and Scrollbars
 #+begin_src emacs-lisp
 (menu-bar-mode -1)
@@ -361,6 +349,11 @@ one, an error is signaled."
                                  'ivy-rich-switch-buffer-transformer))
 #+end_src
 * ORG MODE
+** Follow links with RET
+#+begin_src emacs-lisp
+  (setq org-return-follows-link t)
+#+end_src
+
 ** Enabling Table of Contents
 #+begin_src emacs-lisp
   (use-package toc-org
@@ -383,8 +376,7 @@ Org-bullets gives us attractive bullets rather than asterisks.
 #+end_src
 * MULTIPLE CURSORS
 #+begin_src emacs-lisp
-(require 'evil-mc)
-(global-evil-mc-mode 1)
+  (use-package multiple-cursors)
 #+end_src
 * PROJECTILE
 #+begin_src emacs-lisp
@@ -719,13 +711,10 @@ Org-bullets gives us attractive bullets rather than asterisks.
 * GIT
 ** Git time machine
 #+begin_src emacs-lisp
-(use-package git-timemachine
-    :after git-timemachine
-    :hook (evil-normalize-keymaps . git-timemachine-hook)
+  (use-package git-timemachine
     :config
-        (evil-define-key 'normal git-timemachine-mode-map (kbd "C-j") 'git-timemachine-show-previous-revision)
-        (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision)
-)
+    (define-key git-timemachine-mode-map (kbd "C-j") #'git-timemachine-show-previous-revision)
+    (define-key git-timemachine-mode-map (kbd "C-k") #'git-timemachine-show-next-revision))
 #+end_src
 ** Magit
 #+begin_src emacs-lisp

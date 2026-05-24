@@ -6,8 +6,6 @@
 			use-package
 			magit
 			vterm
-			evil
-			evil-collection
 			general
 			all-the-icons
 			all-the-icons-dired
@@ -49,7 +47,7 @@
       pdf-tools
       company-auctex
       auctex
-      evil-mc
+      multiple-cursors      
     ]); 
 	};
 
