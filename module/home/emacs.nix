@@ -52,8 +52,9 @@
 	};
 
   home.file = {
-    ".config/emacs/init.el".source = ./init.el;
-    ".config/emacs/early-init.el".source = ./early-init.el;
-    ".config/emacs/config.org".source = ./config.org;
+    ".config/emacs" = {
+      source = ./emacs;
+      recursive = true;
+    };
   };
 }
