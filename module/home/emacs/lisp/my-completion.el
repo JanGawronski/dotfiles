@@ -6,15 +6,16 @@
 ;;; Code:
 
 (use-package company
-  :defer 2
+  :demand t
   :diminish
   :custom
   (company-begin-commands '(self-insert-command))
-  (company-idle-delay .1)
+  (company-idle-delay 0.1)
   (company-minimum-prefix-length 0)
   (company-show-numbers t)
-  (company-tooltip-align-annotations 't)
-  (global-company-mode t))
+  (company-tooltip-align-annotations t)
+  :config
+  (global-company-mode 1))
 
 (use-package company-box
   :after company

@@ -7,7 +7,15 @@
 
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
-  :init (setq lsp-keymap-prefix "C-c l")
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  ;; Keep LSP state in a writable location (important with Nix/Home Manager managed init dirs).
+  (let* ((state-home (or (getenv "XDG_STATE_HOME")
+                         (expand-file-name "~/.local/state")))
+         (emacs-state (expand-file-name "emacs" state-home)))
+    (unless (file-directory-p emacs-state)
+      (make-directory emacs-state t))
+    (setq lsp-session-file (expand-file-name "lsp-session-v1" emacs-state)))
   :custom
   (lsp-idle-delay 0.5)
   :config
