@@ -5,14 +5,21 @@
 
 ;;; Code:
 
-(use-package all-the-icons
-  :if (display-graphic-p))
-
-(use-package all-the-icons-dired
-  :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
-
 (use-package nerd-icons
-  :if (display-graphic-p))
+  :if (locate-library "nerd-icons"))
+
+(use-package nerd-icons-dired
+  :if (locate-library "nerd-icons-dired")
+  :hook (dired-mode . nerd-icons-dired-mode))
+
+(when (display-graphic-p)
+  (let ((nf "FiraCode Nerd Font Mono"))
+    (when (member nf (font-family-list))
+      (set-fontset-font t 'symbol (font-spec :family nf) nil 'append)
+      (dolist (r '((#xE000 . #xF8FF)
+                   (#xF0000 . #xFFFFD)
+                   (#x100000 . #x10FFFD)))
+        (set-fontset-font t r (font-spec :family nf) nil 'append)))))
 
 (use-package dashboard
   :config
@@ -41,7 +48,6 @@
 
 (electric-pair-mode 1)
 
-;; Keep auto-save (#file#), backups (file~) and other state out of project directories.
 (let* ((state-home (or (getenv "XDG_STATE_HOME")
                        (expand-file-name "~/.local/state")))
        (emacs-state (expand-file-name "emacs" state-home))
@@ -51,12 +57,10 @@
     (unless (file-directory-p dir)
       (make-directory dir t)))
 
-  ;; Auto-saves: redirect #...# files.
   (setq auto-save-file-name-transforms `((".*" ,(file-name-as-directory autosave-dir) t))
         auto-save-list-file-prefix (expand-file-name ".saves-" (file-name-as-directory autosave-dir))
         tramp-auto-save-directory autosave-dir)
 
-  ;; Backups: redirect file~.
   (setq backup-directory-alist `(("." . ,backup-dir))
         backup-by-copying t
         delete-old-versions t
@@ -64,7 +68,6 @@
         kept-old-versions 2
         version-control t))
 
-;; Lockfiles (.#file): these cannot be redirected; disable them if you don't want them.
 (setq create-lockfiles nil)
 
 (use-package doom-themes

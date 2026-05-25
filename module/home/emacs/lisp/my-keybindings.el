@@ -8,7 +8,6 @@
 (define-prefix-command 'my/map)
 (global-set-key (kbd "C-c m") #'my/map)
 
-;; Terminal (note: some terminal emulators won't send C-S-<return>; use C-c m t as fallback).
 (global-set-key (kbd "C-S-<return>") #'vterm-toggle)
 (define-key my/map (kbd "t") #'vterm-toggle)
 

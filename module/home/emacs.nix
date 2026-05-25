@@ -6,16 +6,15 @@
 			use-package
 			magit
 			vterm
-			all-the-icons
-			all-the-icons-dired
 			nerd-icons
+			nerd-icons-dired
+			nerd-icons-ivy-rich
 			company
 			company-box
 			dashboard
 			diminish
 			counsel
 			ivy
-			all-the-icons-ivy-rich
 			ivy-rich
 			toc-org
 			org-bullets

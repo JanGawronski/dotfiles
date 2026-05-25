@@ -19,6 +19,7 @@
 
 (use-package company-box
   :after company
+  :if (display-graphic-p)
   :diminish
   :hook (company-mode . company-box-mode))
 
@@ -53,11 +54,12 @@
   :config
   (ivy-rich-mode 1))
 
-(use-package all-the-icons-ivy-rich
+(use-package nerd-icons-ivy-rich
   :after ivy-rich
+  :if (locate-library "nerd-icons-ivy-rich")
   :demand t
   :config
-  (all-the-icons-ivy-rich-mode 1))
+  (nerd-icons-ivy-rich-mode 1))
 
 (provide 'my-completion)
 ;;; my-completion.el ends here

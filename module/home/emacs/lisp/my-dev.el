@@ -9,7 +9,6 @@
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")
-  ;; Keep LSP state in a writable location (important with Nix/Home Manager managed init dirs).
   (let* ((state-home (or (getenv "XDG_STATE_HOME")
                          (expand-file-name "~/.local/state")))
          (emacs-state (expand-file-name "emacs" state-home)))
@@ -30,6 +29,9 @@
 
 (with-eval-after-load 'lsp-mode
   (require 'lsp-headerline))
+
+(with-eval-after-load 'lsp-headerline
+  (setq lsp-headerline-breadcrumb-icons-enable nil))
 
 (use-package lsp-ui
   :after lsp-mode
