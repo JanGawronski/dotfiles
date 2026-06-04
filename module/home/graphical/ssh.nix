@@ -2,34 +2,34 @@
   programs.ssh = {
 		enable = true;
 		enableDefaultConfig = false;
-		matchBlocks = {
+		settings = {
 			"server" = {
-				hostname = "192.168.1.70";
-				user = "user";
-			 	identityFile = "/home/user/.ssh/id_ed25519";
+				HostName = "192.168.1.70";
+				User = "user";
+			 	IdentityFile = "/home/user/.ssh/id_ed25519";
 				identitiesOnly = true;
 			};
 
       "computer" = {
-        hostname = "192.168.1.50";
-        user = "user";
-      	identityFile = "/home/user/.ssh/id_ed25519";
-				identitiesOnly = true;
+        HostName = "192.168.1.50";
+        User = "user";
+      	IdentityFile = "/home/user/.ssh/id_ed25519";
+				IdentitiesOnly = true;
       };
         
       "bastion" = {
-				hostname = "bastion.ii.agh.edu.pl";
-				user = "gawronsk";
-				identityFile = "/home/user/.ssh/id_ed25519";
-				identitiesOnly = true;
+				HostName = "bastion.ii.agh.edu.pl";
+				User = "gawronsk";
+				IdentityFile = "/home/user/.ssh/id_ed25519";
+				IdentitiesOnly = true;
 			};
 
 			"AGH" = {
-				hostname = "shell.lab.ii.agh.edu.pl";
-				user = "gawronsk";
-				identityFile = "/home/user/.ssh/id_ed25519";
-				identitiesOnly = true;
-				proxyJump = "bastion";
+				HostName = "shell.lab.ii.agh.edu.pl";
+				User = "gawronsk";
+				IdentityFile = "/home/user/.ssh/id_ed25519";
+				IdentitiesOnly = true;
+				ProxyJump = "bastion";
 			};
 		};
 	};
