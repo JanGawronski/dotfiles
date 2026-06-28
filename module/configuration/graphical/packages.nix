@@ -4,7 +4,7 @@
     xmobar
     dmenu
     vmpk
-    mpv
+    (mpv.override { scripts = with pkgs.mpvScripts; [ mpris ];})
     feh
     krita
     playerctl
