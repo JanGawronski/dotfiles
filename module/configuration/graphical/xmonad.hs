@@ -95,7 +95,7 @@ main = xmonad $ docks def
   , ("M-s p s d", spawn "playerctl shuffle Off")
   , ("<XF86AudioPlay>", spawn "playerctl play-pause")
   , ("<XF86AudioPause>", spawn "playerctl play-pause")
-  , ("<XF86AudioPrev>", spawn "playerctl play-pause")
+  , ("<XF86AudioPrev>", spawn "playerctl position -30")
   , ("M-z", spawn "xdotool keyup Super_L+z && xset dpms force off")
   , ("M-v", spawn "copyq menu")
   , ("<Print>", spawn "maim -s | xclip -selection clipboard -t image/png")
