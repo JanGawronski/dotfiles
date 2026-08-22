@@ -46,5 +46,7 @@
     file
     usbutils
     poppler-utils
+    screen
+    tmux
   ];
 }
