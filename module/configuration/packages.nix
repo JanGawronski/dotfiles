@@ -48,5 +48,6 @@
     poppler-utils
     screen
     tmux
+    moreutils
   ];
 }
