@@ -49,5 +49,6 @@
     screen
     tmux
     moreutils
+    vhdl-ls
   ];
 }

@@ -18,6 +18,7 @@
   :custom
   (lsp-idle-delay 0.5)
   :config
+  (require 'lsp-diagnostics)
   (lsp-enable-which-key-integration t)
   (setq lsp-inlay-hint-enable t))
 
@@ -299,6 +300,15 @@
 (add-hook 'pdf-view-mode-hook
           (lambda ()
             (display-line-numbers-mode -1)))
+
+(use-package vhdl-mode
+  :ensure t
+  :mode (("\\.vhd\\'" . vhdl-mode)
+         ("\\.vhdl\\'" . vhdl-mode))
+  :hook ((vhdl-mode . lsp-deferred)))
+
+(with-eval-after-load 'lsp-mode
+  (setq lsp-vhdl-server 'vhdl-ls))
 
 (provide 'my-dev)
 ;;; my-dev.el ends here
