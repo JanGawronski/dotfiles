@@ -9,5 +9,6 @@
     ./vesktop.nix
     ./vscode.nix
     ./xmobar.nix
+    ./zen-browser.nix
   ];
 }

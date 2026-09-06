@@ -1,4 +1,4 @@
-{pkgs, zen-browser, ...}: {
+{pkgs, ...}: {
   imports = [
     ./../../module/home
   ];
