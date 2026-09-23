@@ -50,5 +50,6 @@
     tmux
     moreutils
     vhdl-ls
+    imagemagickBig
   ];
 }
