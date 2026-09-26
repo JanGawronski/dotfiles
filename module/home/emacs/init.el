@@ -1,4 +1,9 @@
-;;; init.el -*- lexical-binding: t; -*-
+;;; init.el --- Initialization -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Initialization.
+
+;;; Code:
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
@@ -22,3 +27,4 @@
 (require 'my-shell)
 (require 'my-ui)
 (require 'my-editing)
+;;; init.el ends here
