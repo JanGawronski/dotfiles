@@ -1,0 +1,256 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -17,7 +17,7 @@
+ LDLIBS    = `$(PKG_CONFIG) --libs $(PKGS)` $(WLR_LIBS) -lm $(LIBS)
+ 
+ all: dwl
+-dwl: dwl.c client.h chords.h config.h ime.h util.h config.mk cursor-shape-v1-protocol.h \
++dwl: dwl.c client.h chords.h workspaces.h config.h ime.h util.h config.mk cursor-shape-v1-protocol.h \
+ 	ext-image-copy-capture-v1-protocol.h \
+ 	pointer-constraints-unstable-v1-protocol.h wlr-layer-shell-unstable-v1-protocol.h \
+ 	wlr-output-power-management-unstable-v1-protocol.h xdg-shell-protocol.h
+diff --git a/dwl.c b/dwl.c
+--- a/dwl.c
++++ b/dwl.c
+@@ -169,6 +169,7 @@
+ } Key;
+ 
+ #include "chords.h"
++#include "workspaces.h"
+ 
+ typedef struct {
+ 	struct wlr_keyboard_group *wlr_group;
+@@ -237,6 +238,7 @@
+ 	const Layout *lt;
+ 	enum wl_output_transform rr;
+ 	int x, y;
++	uint32_t initialtag;
+ } MonitorRule;
+ 
+ typedef struct {
+@@ -309,6 +311,7 @@
+ static void focusmon(const Arg *arg);
+ static void focusstack(const Arg *arg);
+ static Client *focustop(Monitor *m);
++static uint32_t firstfreetag(Monitor *excluded, uint32_t preferred);
+ static void fullscreennotify(struct wl_listener *listener, void *data);
+ static void gpureset(struct wl_listener *listener, void *data);
+ static void handlecursoractivity(void);
+@@ -363,8 +365,6 @@
+ static void tile(Monitor *m);
+ static void togglefloating(const Arg *arg);
+ static void togglefullscreen(const Arg *arg);
+-static void toggletag(const Arg *arg);
+-static void toggleview(const Arg *arg);
+ static void unlocksession(struct wl_listener *listener, void *data);
+ static void unmaplayersurfacenotify(struct wl_listener *listener, void *data);
+ static void unmapnotify(struct wl_listener *listener, void *data);
+@@ -372,6 +372,7 @@
+ static void updatetitle(struct wl_listener *listener, void *data);
+ static void urgent(struct wl_listener *listener, void *data);
+ static void view(const Arg *arg);
++static Monitor *workspaceon(uint32_t tag, Monitor *excluded);
+ static void virtualkeyboard(struct wl_listener *listener, void *data);
+ static void virtualpointer(struct wl_listener *listener, void *data);
+ static Monitor *xytomon(double x, double y);
+@@ -526,8 +527,33 @@
+ 		c->geom.x = bbox->x;
+ 	if (c->geom.y + c->geom.height <= bbox->y)
+ 		c->geom.y = bbox->y;
+ }
+ 
++Monitor *
++workspaceon(uint32_t tag, Monitor *excluded)
++{
++	Monitor *m;
++
++	wl_list_for_each(m, &mons, link)
++		if (m != excluded && m->wlr_output->enabled && m->tagset[m->seltags] == tag)
++			return m;
++	return NULL;
++}
++
++uint32_t
++firstfreetag(Monitor *excluded, uint32_t preferred)
++{
++	Monitor *m;
++	uint32_t used = 0, tag;
++
++	wl_list_for_each(m, &mons, link)
++		if (m != excluded && m->wlr_output->enabled)
++			used |= m->tagset[m->seltags];
++	if (!(tag = initialworkspacetag(preferred, used, TAGMASK)))
++		die("dwl: invalid initial workspace or too many connected monitors");
++	return tag;
++}
++
+ void
+ applyrules(Client *c)
+ {
+@@ -554,6 +580,8 @@
+ 		}
+ 	}
+ 
++	if (newtags && !(newtags & (newtags - 1)) && (m = workspaceon(newtags, NULL)))
++		mon = m;
+ 	c->isfloating |= client_is_float_type(c);
+ 	setmon(c, mon, newtags);
+ }
+@@ -1158,5 +1187,6 @@
+ 	struct wlr_output *wlr_output = data;
+ 	const MonitorRule *r;
+ 	size_t i;
++	uint32_t initialtag = 0;
+ 	struct wlr_output_state state;
+ 	Monitor *m;
+@@ -1172,7 +1202,6 @@
+ 
+ 	wlr_output_state_init(&state);
+ 	/* Initialize monitor state using configured rules */
+-	m->tagset[0] = m->tagset[1] = 1;
+ 	for (r = monrules; r < END(monrules); r++) {
+ 		if (!r->name || strstr(wlr_output->name, r->name)) {
+ 			m->m.x = r->x;
+@@ -1185,7 +1215,10 @@
+ 			wlr_output_state_set_scale(&state, r->scale);
+ 			wlr_output_state_set_transform(&state, r->rr);
++			initialtag = r->initialtag;
+ 			break;
+ 		}
+ 	}
+ 
++	m->tagset[0] = m->tagset[1] = firstfreetag(NULL, initialtag);
++
+ 	/* The mode is a tuple of (width, height, refresh rate), and each
+@@ -2419,6 +2447,8 @@
+ 	wlr_output_commit_state(m->wlr_output, &state);
+ 
+ 	m->asleep = !event->mode;
++	if (event->mode && workspaceon(m->tagset[m->seltags], m))
++		m->tagset[0] = m->tagset[1] = firstfreetag(m, 0);
+ 	updatemons(NULL, NULL);
+ }
+ 
+@@ -2979,10 +3009,20 @@
+ tag(const Arg *arg)
+ {
+ 	Client *sel = focustop(selmon);
+-	if (!sel || (arg->ui & TAGMASK) == 0)
++	Monitor *m;
++	uint32_t target = arg->ui & TAGMASK;
++
++	if (!sel || !target)
+ 		return;
++	if (target & (target - 1)) {
++		fprintf(stderr, "dwl: a window can only be tagged to one workspace\n");
++		return;
++	}
+ 
+-	sel->tags = arg->ui & TAGMASK;
++	if ((m = workspaceon(target, NULL)) && m != selmon)
++		setmon(sel, m, target);
++	else
++		sel->tags = target;
+ 	focusclient(focustop(selmon), 1);
+ 	arrange(selmon);
+ 	printstatus();
+@@ -3048,33 +3088,6 @@
+ }
+ 
+ void
+-toggletag(const Arg *arg)
+-{
+-	uint32_t newtags;
+-	Client *sel = focustop(selmon);
+-	if (!sel || !(newtags = sel->tags ^ (arg->ui & TAGMASK)))
+-		return;
+-
+-	sel->tags = newtags;
+-	focusclient(focustop(selmon), 1);
+-	arrange(selmon);
+-	printstatus();
+-}
+-
+-void
+-toggleview(const Arg *arg)
+-{
+-	uint32_t newtagset;
+-	if (!(newtagset = selmon ? selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK) : 0))
+-		return;
+-
+-	selmon->tagset[selmon->seltags] = newtagset;
+-	focusclient(focustop(selmon), 1);
+-	arrange(selmon);
+-	printstatus();
+-}
+-
+-void
+ unlocksession(struct wl_listener *listener, void *data)
+ {
+ 	SessionLock *lock = wl_container_of(listener, lock, unlock);
+@@ -3173,8 +3186,11 @@
+ 	/* Insert outputs that need to */
+ 	wl_list_for_each(m, &mons, link) {
+ 		if (m->wlr_output->enabled
+-				&& !wlr_output_layout_get(output_layout, m->wlr_output))
++				&& !wlr_output_layout_get(output_layout, m->wlr_output)) {
++			if (workspaceon(m->tagset[m->seltags], m))
++				m->tagset[0] = m->tagset[1] = firstfreetag(m, 0);
+ 			wlr_output_layout_add_auto(output_layout, m->wlr_output);
++		}
+ 	}
+ 
+ 	/* Now that we update the output layout we can get its box */
+@@ -3208,6 +3224,9 @@
+ 
+ 		/* Calculate the effective monitor geometry to use for clients */
+ 		arrangelayers(m);
++		wl_list_for_each(c, &clients, link)
++			if (c->tags == m->tagset[m->seltags] && c->mon != m)
++				setmon(c, m, c->tags);
+ 		/* Don't move clients to the left output when plugging monitors */
+ 		arrange(m);
+ 		/* make sure fullscreen clients have the right size */
+@@ -3285,13 +3304,35 @@
+ void
+ view(const Arg *arg)
+ {
+-	if (!selmon || (arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
++	Monitor *other, *current = selmon;
++	Client *c;
++	uint32_t target, previous;
++
++	if (!current)
+ 		return;
+-	selmon->seltags ^= 1; /* toggle sel tagset */
+-	if (arg->ui & TAGMASK)
+-		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
+-	focusclient(focustop(selmon), 1);
+-	arrange(selmon);
++	target = (arg->ui & TAGMASK) ? arg->ui & TAGMASK
++			: current->tagset[current->seltags ^ 1];
++	if (!target || target == current->tagset[current->seltags])
++		return;
++	if (target & (target - 1)) {
++		fprintf(stderr, "dwl: only one workspace can be viewed on an output\n");
++		return;
++	}
++
++	previous = current->tagset[current->seltags];
++	other = workspaceon(target, current);
++	switchworkspacetags(current->tagset, &current->seltags,
++			other ? other->tagset : NULL, other ? &other->seltags : NULL, target);
++	wl_list_for_each(c, &clients, link) {
++		if (other && c->tags == previous && c->mon != other)
++			setmon(c, other, c->tags);
++		else if (c->tags == target && c->mon != current)
++			setmon(c, current, c->tags);
++	}
++	if (other)
++		arrange(other);
++	focusclient(focustop(current), 1);
++	arrange(current);
+ 	printstatus();
+ }
+ 

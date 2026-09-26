@@ -1,16 +1,19 @@
 {pkgs, ...}:
 {
   graphicalPackages = with pkgs; [
-    xmobar
-    dmenu
     vmpk
     (mpv.override { scripts = with pkgs.mpvScripts; [ mpris ];})
-    feh
     krita
     playerctl
-    maim
-    xdotool
-    xclip
     prismlauncher
+    cliphist
+    fuzzel
+    grim
+    imv
+    slurp
+    wl-clipboard
+    wlopm
+    wlr-randr
+    wtype
   ];
 }

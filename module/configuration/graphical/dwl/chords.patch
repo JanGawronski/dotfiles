@@ -1,0 +1,173 @@
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -24,4 +24,4 @@ all: dwl
+-dwl: dwl.c client.h config.h ime.h util.h config.mk cursor-shape-v1-protocol.h \
++dwl: dwl.c client.h chords.h config.h ime.h util.h config.mk cursor-shape-v1-protocol.h \
+ 	ext-image-copy-capture-v1-protocol.h \
+ 	pointer-constraints-unstable-v1-protocol.h wlr-layer-shell-unstable-v1-protocol.h \
+ 	wlr-output-power-management-unstable-v1-protocol.h xdg-shell-protocol.h
+diff --git a/dwl.c b/dwl.c
+--- a/dwl.c
++++ b/dwl.c
+@@ -168,6 +168,8 @@ typedef struct {
+ 	const Arg arg;
+ } Key;
+ 
++#include "chords.h"
++
+ typedef struct {
+ 	struct wlr_keyboard_group *wlr_group;
+ 	struct wlr_keyboard *virtual_keyboard;
+@@ -315,6 +317,8 @@ static void inputdevice(struct wl_listener *listener, void *data);
+ static const Key *keybinding(uint32_t mods, xkb_keysym_t sym);
+ static void keypress(struct wl_listener *listener, void *data);
+ static void keypressmod(struct wl_listener *listener, void *data);
++static int chordtimeout(void *data);
++static void resetchord(void);
+ static int keyrepeat(void *data);
+ static void killclient(const Arg *arg);
+ static void locksession(struct wl_listener *listener, void *data);
+@@ -430,5 +434,10 @@ static struct wl_list mons;
+ static Monitor *selmon;
+ static int consumed[KEY_MAX + 1];
+ 
++static xkb_keysym_t chordkeys[CHORD_MAX_KEYS];
++static size_t chordlength;
++static uint32_t chordmods;
++static struct wl_event_source *chord_timer;
++
+ /* global event handlers */
+ static struct wl_listener cursor_axis = {.notify = axisnotify};
+@@ -791,5 +799,6 @@ cleanup(void)
+ 		waitpid(child_pid, NULL, 0);
+ 	}
+ 	wlr_xcursor_manager_destroy(cursor_mgr);
++	wl_event_source_remove(chord_timer);
+ 
+ 	destroykeyboardgroup(&kb_group->destroy, NULL);
+@@ -1735,6 +1744,61 @@ keybinding(uint32_t mods, xkb_keysym_t sym)
+ 	return NULL;
+ }
+ 
++void
++resetchord(void)
++{
++	chordlength = 0;
++	wl_event_source_timer_update(chord_timer, 0);
++}
++
++int
++chordtimeout(void *data)
++{
++	resetchord();
++	return 0;
++}
++
++ChordMatch
++trychord(uint32_t mods, const xkb_keysym_t *syms, const Chord **complete)
++{
++	xkb_keysym_t entered[CHORD_MAX_KEYS];
++	ChordMatch result;
++	size_t length = chordlength + 1;
++	uint32_t firstmods = chordlength ? chordmods : mods;
++	int i;
++
++	*complete = NULL;
++	if (length > CHORD_MAX_KEYS) {
++		resetchord();
++		return ChordNone;
++	}
++
++	for (i = 0; i < (int)chordlength; i++)
++		entered[i] = chordkeys[i];
++	for (i = 0; i < 2; i++) {
++		if (i && syms[i] == syms[0])
++			break;
++		entered[length - 1] = syms[i];
++		result = matchchord(chords, LENGTH(chords), firstmods,
++				WLR_MODIFIER_CAPS, entered, length, complete);
++		if (result == ChordNone)
++			continue;
++		if (result == ChordPrefix) {
++			memcpy(chordkeys, entered, length * sizeof(*entered));
++			chordlength = length;
++			chordmods = firstmods;
++			wl_event_source_timer_update(chord_timer, chord_timeout_ms);
++		} else {
++			resetchord();
++		}
++		return result;
++	}
++
++	if (chordlength)
++		resetchord();
++	return ChordNone;
++}
++
+ void
+ keypress(struct wl_listener *listener, void *data)
+ {
+@@ -1746,5 +1804,6 @@ keypress(struct wl_listener *listener, void *data)
+ 	xkb_layout_index_t layout = xkb_state_key_get_layout(kb->xkb_state, keycode);
+ 	int handled = 0;
++	int repeatable = 0;
+ 
+ 	// Get the keysyms for level 0 (normal) and level 1 (shifted)
+ 	// Only one keysym for each level:
+@@ -1759,17 +1826,33 @@ keypress(struct wl_listener *listener, void *data)
+ 	/* On _press_ if there is no active screen locker,
+ 	 * attempt to process a compositor keybinding. */
+ 	if (!locked && event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+-		for (int i = 0; i < 2; i++) {
+-			const Key *key = keybinding(group->mods, group->keysyms[i]);
+-			if (key) {
+-				consumed[event->keycode] = 1;
+-				key->func(&key->arg);
+-				handled = 1;
+-				break;
++		const Chord *action = NULL;
++		const Key *key = NULL;
++
++		for (int i = 0; i < 2 && !key; i++)
++			key = keybinding(group->mods, group->keysyms[i]);
++		if (key && (key->func == chvt || key->func == quit)) {
++			resetchord();
++			consumed[event->keycode] = handled = 1;
++			key->func(&key->arg);
++		} else if (chordlength && group->keysyms[0] == XKB_KEY_Escape) {
++			resetchord();
++			consumed[event->keycode] = handled = 1;
++		} else {
++			ChordMatch chord = trychord(group->mods, group->keysyms, &action);
++
++			if (chord != ChordNone) {
++				consumed[event->keycode] = handled = 1;
++				if (action)
++					action->func(&action->arg);
++			} else if (key) {
++				consumed[event->keycode] = handled = 1;
++				repeatable = 1;
++				key->func(&key->arg);
+ 			}
+ 		}
+ 	}
+ 
+-	if (handled && group->wlr_group->keyboard.repeat_info.delay > 0)
++	if (repeatable && group->wlr_group->keyboard.repeat_info.delay > 0)
+ 		wl_event_source_timer_update(group->key_repeat_source,
+ 				group->wlr_group->keyboard.repeat_info.delay);
+@@ -1844,5 +1926,6 @@ locksession(struct wl_listener *listener, void *data)
+ 		wlr_session_lock_v1_destroy(session_lock);
+ 		return;
+ 	}
++	resetchord();
+ 	lock = session_lock->data = ecalloc(1, sizeof(*lock));
+ 	focusclient(NULL, 0);
+@@ -2615,5 +2698,6 @@ setup(void)
+ 	 * clients from the Unix socket, managing Wayland globals, and so on. */
+ 	dpy = wl_display_create();
+ 	event_loop = wl_display_get_event_loop(dpy);
++	chord_timer = wl_event_loop_add_timer(event_loop, chordtimeout, NULL);
+ 
+ 	/* The backend is a wlroots feature which abstracts the underlying input and

@@ -9,4 +9,10 @@
   ];
 
   environment.systemPackages = (import ./../../module/configuration/packages.nix { inherit pkgs; }).basePackages ++ (import ./../../module/configuration/graphical/packages.nix { inherit pkgs; }).graphicalPackages;
+
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked = "ignore";
+  };
 }
