@@ -1,9 +1,3 @@
-{ pkgs, ... }:
-let
-  swapStatus = pkgs.writeShellScript "dwl-swap-status" ''
-    ${pkgs.gawk}/bin/awk '/^SwapTotal:/ { total = $2 } /^SwapFree:/ { free = $2 } END { if (total == 0) print "Swap: 0% |"; else printf "Swap: %.0f%% |\n", (total - free) * 100 / total }' /proc/meminfo
-  '';  
-in
 {
   programs.waybar = {
     enable = true;
@@ -18,7 +12,7 @@ in
       position = "top";
       height = 24;
       spacing = 8;
-      modules-right = [ "wireplumber" "cpu" "memory" "custom/swap" "clock" ];
+      modules-right = [ "wireplumber" "cpu" "memory" "clock" ];
       wireplumber = {
         node-type = "Audio/Source";
         format = "Mic unmuted |";
@@ -31,12 +25,7 @@ in
       };
       memory = {
         interval = 10;
-        format = "Mem: {percentage}% |";
-      };
-      "custom/swap" = {
-        exec = "${swapStatus}";
-        interval = 10;
-        format = "{}";
+        format = "Mem: {percentage}% | Swap: {swapPercentage}% |";
       };
       clock = {
         interval = 1;
