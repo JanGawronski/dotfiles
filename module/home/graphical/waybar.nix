@@ -1,12 +1,5 @@
 { pkgs, ... }:
 let
-  micStatus = pkgs.writeShellScript "dwl-mic-status" ''
-    volume="$(${pkgs.wireplumber}/bin/wpctl get-volume @DEFAULT_AUDIO_SOURCE@)" || exit $?
-    case "$volume" in
-      *MUTED*) echo "" ;;
-      *) echo "Mic unmuted |" ;;
-    esac
-  '';
   swapStatus = pkgs.writeShellScript "dwl-swap-status" ''
     ${pkgs.gawk}/bin/awk '/^SwapTotal:/ { total = $2 } /^SwapFree:/ { free = $2 } END { if (total == 0) print "Swap: 0% |"; else printf "Swap: %.0f%% |\n", (total - free) * 100 / total }' /proc/meminfo
   '';  
@@ -25,11 +18,12 @@ in
       position = "top";
       height = 24;
       spacing = 8;
-      modules-right = [ "custom/mic" "cpu" "memory" "custom/swap" "clock" ];
-      "custom/mic" = {
-        exec = "${micStatus}";
-        interval = 1;
-        format = "{}";
+      modules-right = [ "wireplumber" "cpu" "memory" "custom/swap" "clock" ];
+      wireplumber = {
+        node-type = "Audio/Source";
+        format = "Mic unmuted |";
+        format-muted = "";
+        tooltip = false;
       };
       cpu = {
         interval = 10;
