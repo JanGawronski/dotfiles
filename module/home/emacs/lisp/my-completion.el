@@ -15,6 +15,7 @@
   (company-show-numbers t)
   (company-tooltip-align-annotations t)
   :config
+  (require 'company-childframe)
   (global-company-mode 1))
 
 (use-package company-box
