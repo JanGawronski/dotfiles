@@ -12,11 +12,17 @@
       position = "top";
       height = 24;
       spacing = 8;
-      modules-right = [ "wireplumber" "cpu" "memory" "clock" ];
+      modules-right = [ "wireplumber" "battery" "cpu" "memory" "clock" ];
       wireplumber = {
         node-type = "Audio/Source";
         format = "Mic unmuted |";
         format-muted = "";
+        tooltip = false;
+      };
+      battery = {
+        interval = 30;
+        format = "Bat: {capacity}% |";
+        format-charging = "Bat: {capacity}%+ |";
         tooltip = false;
       };
       cpu = {
