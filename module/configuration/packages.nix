@@ -51,5 +51,6 @@
     moreutils
     vhdl-ls
     imagemagickBig
+    libreoffice
   ];
 }
