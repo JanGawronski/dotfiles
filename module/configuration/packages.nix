@@ -52,5 +52,6 @@
     vhdl-ls
     imagemagickBig
     libreoffice
+    gnupg
   ];
 }
