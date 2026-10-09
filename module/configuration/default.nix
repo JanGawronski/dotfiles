@@ -11,6 +11,7 @@
     ./rtkit.nix
     ./stateversion.nix
     ./timezone.nix
+    ./tor.nix
     ./unfree.nix
     ./user.nix
     ./agenix.nix

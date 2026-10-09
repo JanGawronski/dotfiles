@@ -15,5 +15,6 @@
     wlopm
     wlr-randr
     wtype
+    tor-browser
   ];
 }
