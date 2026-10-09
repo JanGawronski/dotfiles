@@ -2,7 +2,6 @@
 {
   imports = [
     ./../../module/configuration
-    ./../../module/configuration/ssh.nix
     ./bootloader.nix
     ./hardware-configuration.nix
     ./networking.nix

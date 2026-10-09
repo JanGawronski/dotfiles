@@ -3,7 +3,6 @@
   imports = [
     ./../../module/configuration
     ./../../module/configuration/graphical
-    ./../../module/configuration/ssh.nix
     ./hardware-configuration.nix
     ./networking.nix
     ./nvidia.nix
