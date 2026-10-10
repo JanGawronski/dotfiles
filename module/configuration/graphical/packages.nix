@@ -16,5 +16,6 @@
     wlr-randr
     wtype
     tor-browser
+    foliate
   ];
 }
