@@ -53,5 +53,6 @@
     imagemagickBig
     libreoffice
     gnupg
+    man-pages
   ];
 }
