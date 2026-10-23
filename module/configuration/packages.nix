@@ -54,5 +54,6 @@
     libreoffice
     gnupg
     man-pages
+    man-pages-posix
   ];
 }
