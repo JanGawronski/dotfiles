@@ -9,7 +9,6 @@
     ./ssh.nix
     ./waybar.nix
     ./vesktop.nix
-    ./vscode.nix
     ./zen-browser.nix
   ];
 }
