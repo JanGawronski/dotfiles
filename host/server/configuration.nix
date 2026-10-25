@@ -2,7 +2,6 @@
 {
   imports = [
     ./../../module/configuration
-    ./bootloader.nix
     ./hardware-configuration.nix
     ./networking.nix
     ./agenix.nix

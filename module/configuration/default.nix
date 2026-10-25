@@ -1,6 +1,7 @@
 {
   imports = [
     ./agenix.nix
+    ./bootloader.nix
     ./dconf.nix
     ./dynamiclinking.nix
     ./experimental.nix
