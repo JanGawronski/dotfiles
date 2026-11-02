@@ -11,18 +11,12 @@
   :custom
   (company-begin-commands '(self-insert-command))
   (company-idle-delay 0.1)
-  (company-minimum-prefix-length 0)
+  (company-minimum-prefix-length 1)
   (company-show-numbers t)
   (company-tooltip-align-annotations t)
   :config
   (require 'company-childframe)
   (global-company-mode 1))
-
-(use-package company-box
-  :after company
-  :if (display-graphic-p)
-  :diminish
-  :hook (company-mode . company-box-mode))
 
 (use-package ivy
   :demand t
