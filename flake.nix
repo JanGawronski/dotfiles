@@ -24,14 +24,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     }; 
     
-    copilot-cli.url = "github:scarisey/copilot-cli-flake";
-
     quartus.url = "github:jangawronski/quartus-prime-pro-flake";
 
     myFitnessApp.url = "github:jangawronski/myFitnessApp";
   };
   
-  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, playit-nixos-module, musicbot, copilot-cli, quartus, myFitnessApp, ... }: { 
+  outputs = inputs@{ self, nixpkgs, home-manager, zen-browser, agenix, ngrok, playit-nixos-module, musicbot, quartus, myFitnessApp, ... }: { 
     nixosConfigurations = nixpkgs.lib.foldl' (configs: hostname:
       configs // {
         "${hostname}" = nixpkgs.lib.nixosSystem {
@@ -41,7 +39,6 @@
             agenix.nixosModules.default
             { environment.systemPackages = [
                 agenix.packages.x86_64-linux.default
-                copilot-cli.packages.x86_64-linux.default
                 myFitnessApp.packages.x86_64-linux.default
               ]; }
             ngrok.nixosModules.ngrok
