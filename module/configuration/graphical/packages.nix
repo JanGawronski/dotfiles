@@ -17,5 +17,6 @@
     wtype
     tor-browser
     foliate
+    trezor-suite
   ];
 }

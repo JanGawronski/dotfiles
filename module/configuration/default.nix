@@ -16,6 +16,7 @@
     ./stateversion.nix
     ./timezone.nix
     ./tor.nix
+    ./trezord.nix
     ./unfree.nix
     ./user.nix
     ./vim.nix

@@ -1,0 +1,3 @@
+{
+  services.trezord.enable = true;
+}
