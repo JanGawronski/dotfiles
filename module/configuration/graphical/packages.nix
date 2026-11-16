@@ -17,6 +17,7 @@
     wtype
     tor-browser
     foliate
+    nitrokey-app2
     trezor-suite
   ];
 }

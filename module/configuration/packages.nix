@@ -55,6 +55,7 @@
     gnupg
     man-pages
     man-pages-posix
+    pynitrokey
     trezorctl
   ];
 }

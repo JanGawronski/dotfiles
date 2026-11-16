@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   imports = [
     ./agenix.nix
@@ -10,6 +11,7 @@
     ./fonts.nix
     ./kernel.nix
     ./keymap.nix
+    ./nitrokey.nix
     ./pamsshd.nix
     ./rtkit.nix
     ./ssh.nix
